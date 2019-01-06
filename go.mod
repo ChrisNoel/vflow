@@ -1,6 +1,7 @@
 module github.com/VerizonDigital/vflow
 
 require (
+	github.com/ChrisNoel/vflow v0.6.5
 	github.com/Shopify/sarama v1.19.0
 	github.com/Shopify/toxiproxy v2.1.3+incompatible // indirect
 	github.com/bitly/go-nsq v1.0.7
