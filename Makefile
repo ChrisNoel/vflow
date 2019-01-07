@@ -3,6 +3,7 @@ PACKAGES= $(shell find . -name '*.go' -print0 | xargs -0 -n1 dirname | sort --un
 LDFLAGS= -ldflags "-X main.version=${VERSION}"
 DEBPATH= scripts/dpkg
 RPMPATH= scripts/rpmbuild
+CENTOSBUILDPATH= scripts/centosbuild
 ARCH=`uname -m`
 
 default: test
@@ -77,3 +78,20 @@ rpm: build
 	apt-get install rpm
 	rpmbuild -ba ${RPMPATH}/SPECS/vflow.spec --define "_topdir `pwd`/scripts/rpmbuild"
 	sed -i 's/${VERSION}/%VERSION%/' ${RPMPATH}/SPECS/vflow.spec
+
+build-centos: build
+	sed -i 's/%VERSION%/${VERSION}/' ${CENTOSBUILDPATH}/SPECS/vflow.spec
+	rm -rf ${CENTOSBUILDPATH}/SOURCES/
+	mkdir ${CENTOSBUILDPATH}/SOURCES/
+	cp vflow/vflow ${CENTOSBUILDPATH}/SOURCES/
+	cp stress/stress ${CENTOSBUILDPATH}/SOURCES/vflow_stress
+	cp scripts/vflow.conf ${CENTOSBUILDPATH}/SOURCES/
+	cp scripts/vflow.service ${CENTOSBUILDPATH}/SOURCES/
+	cp scripts/vflow.logrotate ${CENTOSBUILDPATH}/SOURCES/
+	cp scripts/kafka.conf ${CENTOSBUILDPATH}/SOURCES/mq.conf
+	cp scripts/ipfix.elements ${CENTOSBUILDPATH}/SOURCES/
+	cp LICENSE ${CENTOSBUILDPATH}/SOURCES/license
+	cp NOTICE ${CENTOSBUILDPATH}/SOURCES/notice
+	yum install rpm-build rpmdevtools
+	rpmbuild -ba ${CENTOSBUILDPATH}/SPECS/vflow.spec --define "_topdir `pwd`/${CENTOSBUILDPATH}"
+	sed -i 's/${VERSION}/%VERSION%/' ${CENTOSBUILDPATH}/SPECS/vflow.spec
