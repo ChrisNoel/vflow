@@ -70,8 +70,15 @@ func (m *Message) encodeHeader(b *bytes.Buffer) {
 	b.WriteString(strconv.FormatInt(int64(m.Header.EngType), 10))
 	b.WriteString(",\"EngID\":")
 	b.WriteString(strconv.FormatInt(int64(m.Header.EngID), 10))
-	b.WriteString(",\"SmpInt\":")
-	b.WriteString(strconv.FormatInt(int64(m.Header.SmpInt), 10))
+
+	// Bit bash to determine the sampling mode, and interval
+	mode := (m.Header.SmpInt &^ 0x3fff)     // first 2 bits
+	interval := (m.Header.SmpInt &^ 0xc000) // last 14 bits
+
+	b.WriteString(",\"SamplingMode\":")
+	b.WriteString(strconv.FormatInt(int64(mode), 10))
+	b.WriteString(",\"SamplingInt\":")
+	b.WriteString(strconv.FormatInt(int64(interval), 10))
 	b.WriteString("},")
 }
 
